@@ -1,37 +1,41 @@
-var beat = -1;
-var active = false; 
+var beat = 130;
+var active = false;
 var current_beat = 0;
 
 var timer;
 
-$("#bpm").change(function() {
-    if ($("#bpm").val() < 0) {
-        $("#bpm").val(0)
-    }
-    beat = $("#bpm").val();
-    $("#beat").text(beat);
+var on_bpm_change = function(bpm) {
+    beat = bpm;
     
     if (active) {
         clearInterval(timer)
         timer = setInterval(play, beat_delay())
     }
-});
-
-$('#bpm').on('mousemove change',function() { 
-    $("#beat").text($("#bpm").val());
-});
+}
 
 var activate = function() {
     active = !active;
     if (active) {
         timer = setInterval(play, beat_delay())
-        $(this).text("pause")
+        $("#active").text("pause")
     } else {
-        $(this).text("play")
+        $("#active").text("play")
         clearInterval(timer)
     }
     
 }
+
+$(".metronome .preset_bpm").click(function() {
+    
+    if ($(this).text() == "Angola") {
+        var new_beat = 60;
+    } else if ($(this).text() == "Benguela") {
+        var new_beat = 100;
+    } else if ($(this).text() == "Sao Bento Grande") {
+        var new_beat = 160;
+    }
+    $("#bpm").data("roundSlider").setValue(new_beat)
+});
 
 $("#active").click(activate);
 
@@ -48,7 +52,30 @@ function beat_delay() {
     return (60/beat)*1000;
 }
 
+function changeTooltip(e) {
+    var val = e.value, speed;
+
+    on_bpm_change(val)
+
+    return "<div> " + val + " BPM <div>";
+}
+
 $(function(){
+    $("#bpm").roundSlider({
+        sliderType: "min-range",
+        editableTooltip: false,
+        radius: 105,
+        width: 16,
+        min: 50,
+        value: 130,
+        max: 200,
+        handleSize: 0,
+        handleShape: "square",
+        circleShape: "pie",
+        startAngle: 315,
+        tooltipFormat: "changeTooltip"
+    });
+    $("#bpm").data("roundSlider").setValue(beat)
     beat = $("#bpm").val()
     active = !active // to keep the initial value
     activate()

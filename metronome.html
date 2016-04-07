@@ -3,17 +3,30 @@
   <head>
     <title>Capoeira metronome</title>
     <script src="jquery.min.js"></script>
-     <link rel="stylesheet" type="text/css" href="live.css">
+    <link href="roundslider.min.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="live.css">
+                                    
+    <script src="roundslider.min.js"></script>
+     <meta charset="UTF-8"> 
   </head>
+  
   <body>
-    <audio id="beater">
-      <source src="beep.wav">
-    </audio>
-    <div class="container">
-      <p id="active">play</p>
-      <p id="beat">100</p>
-      <input id="bpm" value="100" type="range" min="0" max="200"></input>
+    
+    <div class="metronome">
+      <audio id="beater">
+        <source src="beep.wav">
+      </audio>
+          
+      <p id="active">start</p>
+      <p id="center">
+        <input id="bpm" type="range" ></input>
+      </p>
+      <p>&nbsp;</p>
+      <p class="preset_bpm">Angola</p>
+      <p class="preset_bpm">Benguela</p>
+      <p class="preset_bpm">Sao Bento Grande</p>
     </div>
+    
     <script type="text/javascript" charset="utf-8" src="metronome.js"></script>
   </body>
 </html>
