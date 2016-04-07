@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Capoeira metronome</title>
+    <script src="jquery.min.js"></script>
+     <link rel="stylesheet" type="text/css" href="live.css">
+  </head>
+  <body>
+    <audio id="beater">
+      <source src="beep.wav">
+    </audio>
+    <div class="container">
+      <p id="active">play</p>
+      <p id="beat">100</p>
+      <input id="bpm" value="100" type="range" min="0" max="200"></input>
+    </div>
+    <script type="text/javascript" charset="utf-8" src="metronome.js"></script>
+  </body>
+</html>
