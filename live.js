@@ -1,74 +1,93 @@
-var BPM = 165;
 
-var NOTES = {"tch": 100,
-             "dim": 50,
-             "dom": 25,
-             "": 0 }
+var BPM = 100;
 
-var TOQUE = ["tch","", "tch","", "dim", "","","", "dom", "", "","", "dom","",""]
+var NOTES = {
+    tch: {height: 100, length: 0.5},
+    dim: {height: 50,  length: 1},
+    dom: {height: 0, length: 1},
+}
+
+var TRANSITION = {
+    "tch-tch": 80,
+    "tch-dim": 40,
+    "dim-dom": -20,
+    "dom-dom": -20,
+    "dom-tch": -20
+}
+
+var TOQUE = ["dim", "dom", "dom", "tch", "tch"]
+
+var MARK_PER_BEAT = 4; // we want quavers (croches), not crotchets (noires)
 
 ///////////////////////////////////////
 
-var dData = function() {
-    return NOTES[TOQUE[position % TOQUE.length]]
+var current_height = function() {
+    if (tempo_position == 0) {
+        return NOTES[current_note].height
+    } else {
+        var transition_position = tempo_position/NOTES[current_note].length
+        var next_note = TOQUE[(toque_position + 1) % TOQUE.length]
+
+        var height = TRANSITION[current_note+"-"+next_note]
+
+        if (transition_position == 1/2) {
+            return height
+        }
+        
+        var closest_height = NOTES[transition_position < 1/2 ? current_note : next_note].height
+
+        var arranged_height = height - ((height - closest_height) * Math.abs(1/2 - transition_position))
+        
+        
+        return arranged_height;
+    }
 };
 
 var beat = function() {
-    position += 1;
+    tempo_position += 1 / MARK_PER_BEAT;
+
+    if (tempo_position >= next_note_delay) {
+        toque_position += 1 
+        toque_position %= TOQUE.length
+
+        current_note = TOQUE[toque_position]
+
+        next_note_delay = NOTES[current_note].length
+        tempo_position = 0
+    }
 }
 
-var dLabel = function() {
-    return "";
-    
-    //return TOQUE[position % TOQUE.length]
+var note_name = function() {
+    if (tempo_position == 0) {
+        return current_note;
+    }
+    return ""
 };
 
 ////////////////////////////////////
 
-var beat_freq_ms = 60 * 1000 / BPM / 4; // we want quavers (croches), not crotchets (noires)
+var beat_freq_ms = 60 * 1000 / BPM / MARK_PER_BEAT; 
 
-var position = 0
+var toque_position = 0
+var tempo_position = 0
 
-var initLabels = []
-var initData  = []
+var current_note = TOQUE[toque_position]
+var next_note_delay = NOTES[current_note].length
 
-var INIT_LENGTH = 40;
-for (i = 0; i < INIT_LENGTH; i++) {
-    beat()
-    initLabels.push(dLabel())
-    initData.push(dData())
+var paused = true
+
+var live__on_loaded = function() {
+    $(document).keypress(function(e) {
+        if (e.which == 13 || e.which == 32) {
+            paused = !paused;
+        } else if (e.which == 43) {
+            beat()
+            updateChart()
+        } else if (e.which == 100) {
+            DEBUG_MODE = !DEBUG_MODE
+            //alert("Debug mode: "+DEBUG_MODE)
+        } else {
+            //alert(e.which)
+        }
+    })
 }
-
-var barChartData = {
-  labels: initLabels,
-  datasets: [{
-    fillColor: "rgba(220,220,220,0.2)",
-      strokeColor: "rgba(220,220,220,1)",
-      pointColor: "rgba(220,220,220,1)",
-    data: initData
-  }]
-}
-
-var ctx = document.getElementById("canvas").getContext("2d");
-var barChartDemo = new Chart(ctx).Line(barChartData, {
-    responsive: true,
-    maintainAspectRatio: false,
-
-    animation: false,
-
-    barValueSpacing: 2,
-    pointDot : false,
-    bezierCurve : true,
-    scaleShowLabels: false,
-
-    scaleBeginAtZero: true,
-    scaleShowVerticalLines: false,
-    showTooltips: false,
-});
-setInterval(function() {
-    beat()
-    
-    barChartDemo.removeData();
-    barChartDemo.addData([dData()], dLabel());
-
-}, beat_freq_ms);
